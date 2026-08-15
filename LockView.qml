@@ -36,9 +36,7 @@ Item {
   readonly property int dotSize: Math.round(fieldHeight * 0.22)
 
   readonly property bool errorState: failureMessage.length > 0
-  readonly property string statusText: authenticatingPassword
-    ? "Checking…"
-    : (fingerprintConfigured ? "Enter password or touch sensor" : "Enter your password")
+  readonly property string statusText: authenticatingPassword ? "Checking…" : ""
 
   signal submitPassword(string password)
   signal passwordTextEdited(string password)
@@ -110,7 +108,7 @@ Item {
       source: wallpaper
       autoPaddingEnabled: false
       blurEnabled: root.loadBackground && wallpaper.status === Image.Ready
-      blur: 1.0
+      blur: 0.2
       blurMax: 128
       blurMultiplier: 1.25
       contrast: -0.08
@@ -136,64 +134,6 @@ Item {
       anchors.centerIn: parent
       width: root.centerWidth
       spacing: Math.round(14 * root.centerScale)
-
-      // ---- Profile picture. ~/.face if present, glyph fallback otherwise.
-      Item {
-        Layout.alignment: Qt.AlignHCenter
-        Layout.bottomMargin: Math.round(22 * root.centerScale)
-        implicitWidth: root.avatarSize
-        implicitHeight: root.avatarSize
-
-        Rectangle {
-          id: avatarBase
-          anchors.fill: parent
-          radius: width / 2
-          color: Util.alpha(Color.foreground, 0.10)
-          border.width: 2
-          border.color: Util.alpha(Color.accent, 0.55)
-
-          Text {
-            anchors.centerIn: parent
-            visible: face.status !== Image.Ready
-            text: "󰀄"
-            color: Util.alpha(Color.foreground, 0.55)
-            font.family: Style.font.family
-            font.pixelSize: Math.round(root.avatarSize * 0.5)
-          }
-        }
-
-        Image {
-          id: face
-          anchors.fill: parent
-          anchors.margins: 2
-          source: "file://" + Quickshell.env("HOME") + "/.face"
-          fillMode: Image.PreserveAspectCrop
-          asynchronous: true
-          visible: false
-          sourceSize.width: root.avatarSize
-          sourceSize.height: root.avatarSize
-        }
-
-        MultiEffect {
-          anchors.fill: face
-          source: face
-          visible: face.status === Image.Ready
-          maskEnabled: true
-          maskSource: avatarMask
-        }
-
-        Item {
-          id: avatarMask
-          anchors.fill: face
-          layer.enabled: true
-          visible: false
-          Rectangle {
-            anchors.fill: parent
-            radius: width / 2
-            color: "white"
-          }
-        }
-      }
 
       // ---- Clock. Hours and minutes sit side by side in two theme colours.
       RowLayout {
@@ -243,19 +183,6 @@ Item {
 
         Behavior on border.color { ColorAnimation { duration: 140 } }
 
-        // Leading state glyph: fingerprint when a sensor is enrolled, padlock
-        // otherwise, so the field says how it can be unlocked.
-        Text {
-          id: leadIcon
-          anchors.left: parent.left
-          anchors.leftMargin: Math.round(root.fieldHeight * 0.32)
-          anchors.verticalCenter: parent.verticalCenter
-          text: root.fingerprintConfigured ? "󰈷" : "󰌾"
-          color: root.errorState ? Color.lock.textError : Util.alpha(Color.foreground, 0.6)
-          font.family: Style.font.family
-          font.pixelSize: Math.round(root.fieldHeight * 0.36)
-        }
-
         // The real input, kept invisible: it owns focus, key handling and the
         // buffer, while the dots below are what the user actually sees.
         TextInput {
@@ -300,13 +227,35 @@ Item {
           elide: Text.ElideRight
         }
 
+        // Fingerprint circle. Hidden if no fingerprint is configured.
+        Rectangle {
+          id: fingerprintCircle
+          visible: root.fingerprintConfigured
+          anchors.left: parent.left
+          anchors.leftMargin: Math.round(root.fieldHeight * 0.14)
+          anchors.verticalCenter: parent.verticalCenter
+          width: Math.round(root.fieldHeight * 0.72)
+          height: width
+          radius: width / 2
+          color: Color.accent
+
+          Text {
+            anchors.centerIn: parent
+            text: "󰈷"
+            color: Color.lock.background
+            font.family: Style.font.family
+            font.pixelSize: Math.round(root.fieldHeight * 0.34)
+            font.weight: Font.Bold
+          }
+        }
+
         // One dot per typed character, popping in as it is typed. The row is
         // clipped rather than scaled: scaling it against its own width made
         // every keystroke re-solve the binding and jump.
         Item {
           id: dotsClip
           anchors.centerIn: parent
-          width: field.width - leadIcon.width - enterButton.width - root.fieldHeight
+          width: field.width - enterButton.width - (root.fingerprintConfigured ? root.fieldHeight + 2 : -15)
           height: field.height
           clip: true
           visible: root.passwordText.length > 0
