@@ -1,4 +1,5 @@
 # Nova Lock
+![Lock screen preview](preview.png)
 
 A drop-in replacement lock screen for the [Omarchy](https://omarchy.org/) Quickshell shell.
 
@@ -10,7 +11,7 @@ whatever theme `omarchy theme set` last applied.
 
 ```bash
 omarchy plugin disable omarchy.lock
-omarchy plugin add https://github.com/dkgamer02ai/nova-lock.git --enable
+omarchy plugin add https://github.com/thomas-roth/nova-lock.git --enable
 ```
 
 Disable the stock lock first: both plugins register the same `lock` IPC target, and
@@ -23,10 +24,6 @@ whichever won the race.
 omarchy-shell lock preview      # click anywhere to dismiss
 omarchy-shell lock hidePreview
 ```
-
-## Profile picture
-
-Drop a square image at `~/.face`. Without one, a glyph placeholder is drawn instead.
 
 ## Update
 
