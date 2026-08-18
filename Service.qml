@@ -373,7 +373,7 @@ Item {
 
   Timer {
     id: idleBlankTimer
-    interval: 5000
+    interval: 120000 // 2 min
     repeat: false
     property double armedAt: 0
     onTriggered: {
@@ -384,7 +384,7 @@ Item {
         root.armBlankTimer()
         return
       }
-      if (root.lockRequested && !root.authenticating) root.runBlank()
+      if (root.lockRequested && !root.authenticatingPassword) root.runBlank()
     }
   }
 
@@ -407,9 +407,9 @@ Item {
     function onScreensChanged() { root.requestSessionLock() }
   }
 
-  onAuthenticatingChanged: {
+  onAuthenticatingPasswordChanged: {
     if (!lockRequested) return
-    if (authenticating) idleBlankTimer.stop()
+    if (authenticatingPassword) idleBlankTimer.stop()
     else armBlankTimer()
   }
 
