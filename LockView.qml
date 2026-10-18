@@ -13,13 +13,17 @@ Item {
   id: root
 
   property string backgroundPath: ""
+  property string videoPosterPath: ""
   property int backgroundVersion: 0
   property bool fingerprintConfigured: false
+  property bool fingerprintUnavailable: false
   property bool authenticatingPassword: false
   property string failureMessage: ""
   property int failedAttempts: 0
   property bool inputEnabled: true
   property bool loadBackground: true
+  property bool displaysBlank: false
+  property bool powerSaverActive: false
   property string passwordText: ""
   property bool syncingPasswordText: false
 

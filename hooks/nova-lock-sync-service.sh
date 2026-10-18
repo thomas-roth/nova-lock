@@ -13,13 +13,21 @@
 
 set -euo pipefail
 
-STOCK=/usr/share/omarchy/shell/plugins/lock/Service.qml
-PLUGIN="$HOME/.config/omarchy/plugins/io.github.dkgamer02ai.lock/Service.qml"
+STOCK_DIR=/usr/share/omarchy/shell/plugins/lock
+PLUGIN_DIR="$HOME/.config/omarchy/plugins/io.github.dkgamer02ai.lock"
 
-[[ -f $STOCK && -f $PLUGIN ]] || exit 0
-cmp -s "$STOCK" "$PLUGIN" && exit 0
+[[ -f $STOCK_DIR/Service.qml && -f $PLUGIN_DIR/Service.qml ]] || exit 0
 
-cp -- "$STOCK" "$PLUGIN"
+# Service.qml imports sibling .js modules, so sync those alongside it.
+changed=0
+for stock in "$STOCK_DIR"/Service.qml "$STOCK_DIR"/*.js; do
+  [[ -f $stock ]] || continue
+  plugin="$PLUGIN_DIR/$(basename -- "$stock")"
+  cmp -s "$stock" "$plugin" && continue
+  cp -- "$stock" "$plugin"
+  changed=1
+done
+(( changed )) || exit 0
 
 omarchy-notification-send -g 󰌾 \
   "Nova Lock" \
